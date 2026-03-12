@@ -1,87 +1,94 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Pro 🧪</title>
+    <title>GYM TRACKER PRO 🧪</title>
     <style>
         :root {
             --bg: #000000; --card: #111111; --neon: #ccff00; 
-            --text: #ffffff; --drawer-bg: #151515;
+            --text: #ffffff; --drawer-bg: #151515; --input-bg: #080808;
         }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 0; margin: 0; }
         
-        /* الهيدر المحسن مع الفلتر */
+        /* Navbar */
         .navbar { 
             background: var(--card); padding: 10px 15px; display: flex; align-items: center; 
             border-bottom: 2px solid var(--neon); position: sticky; top: 0; z-index: 100; gap: 10px;
         }
-        .menu-btn { font-size: 28px; cursor: pointer; color: var(--neon); background: none; border: none; padding: 0; }
-        
-        /* تصميم الفلتر */
+        .menu-btn { font-size: 28px; cursor: pointer; color: var(--neon); background: none; border: none; order: 2; }
         #dayFilter {
-            background: #222; color: var(--neon); border: 1px solid var(--neon);
-            padding: 8px; border-radius: 8px; font-weight: bold; flex-grow: 1; outline: none;
+            background: #111; color: var(--neon); border: 1px solid var(--neon);
+            padding: 8px; border-radius: 8px; flex-grow: 1; outline: none; font-weight: bold; order: 1;
         }
 
-        /* المنيو الجانبي */
+        /* Drawer */
         .drawer { 
-            position: fixed; top: 0; right: -100%; width: 85%; height: 100%; 
+            position: fixed; top: 0; left: -100%; width: 85%; height: 100%; 
             background: var(--drawer-bg); z-index: 1000; transition: 0.4s ease;
-            padding: 25px; box-sizing: border-box; border-left: 1px solid var(--neon);
+            padding: 25px; box-sizing: border-box; border-right: 1px solid var(--neon);
         }
-        .drawer.open { right: 0; }
+        .drawer.open { left: 0; }
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 999; }
         .overlay.show { display: block; }
 
-        input { background: #222; color: white; border: 1px solid #444; padding: 12px; margin: 10px 0; width: 100%; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
+        .drawer input { background: #222; color: white; border: 1px solid #444; padding: 12px; margin: 10px 0; width: 100%; border-radius: 10px; box-sizing: border-box; }
         .btn-add { background: var(--neon); color: black; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: 900; cursor: pointer; }
 
-        /* عرض التمارين */
+        /* Training Display */
         .container { padding: 20px; }
         .day-group { margin-bottom: 30px; }
         .day-label { 
-            background: var(--neon); color: black; padding: 6px 14px; border-radius: 6px; 
-            font-size: 13px; font-weight: 900; display: inline-block; margin-bottom: 15px;
+            background: var(--neon); color: black; padding: 6px 16px; border-radius: 8px; 
+            font-size: 14px; font-weight: 900; display: inline-block; margin-bottom: 15px;
+            text-transform: uppercase;
         }
         
         .ex-card { 
-            background: var(--card); padding: 15px; border-radius: 15px; 
-            display: flex; align-items: center; gap: 12px; margin-bottom: 10px; border: 1px solid #222;
+            background: var(--card); padding: 20px; border-radius: 20px; 
+            margin-bottom: 15px; border: 1px solid #222;
         }
         .ex-card.completed { opacity: 0.3; filter: grayscale(1); }
-        .check-circle { width: 28px; height: 28px; border: 2px solid var(--neon); border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .completed .check-circle { background: var(--neon); color: black; }
-        .completed .check-circle::after { content: "✓"; font-weight: 900; }
 
-        .info { flex-grow: 1; }
-        .ex-name { font-weight: bold; font-size: 17px; display: block; margin-bottom: 5px; }
-        .edit-fields { display: flex; gap: 8px; }
-        .edit-fields input { width: 60px; padding: 5px; text-align: center; margin: 0; color: var(--neon); font-weight: bold; background: #000; border: 1px solid #333; }
-        .unit { font-size: 11px; color: #666; align-self: center; }
-        .del-icon { color: #ff3333; background: none; border: none; font-size: 20px; cursor: pointer; }
+        .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .ex-name { font-weight: bold; font-size: 20px; color: var(--neon); text-align: left; }
+
+        .check-box { 
+            width: 35px; height: 35px; border: 2px solid var(--neon); border-radius: 10px; 
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        .completed .check-box { background: var(--neon); color: black; }
+        .completed .check-box::after { content: "✓"; font-weight: 900; font-size: 22px; }
+
+        /* Control Grid */
+        .controls-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: flex-start; }
+        .edit-item { display: flex; align-items: center; gap: 8px; }
+        .edit-item label { color: #666; font-size: 12px; font-weight: bold; order: 1; }
+        .edit-item input { 
+            width: 70px; background: var(--input-bg); color: var(--neon); border: none; 
+            padding: 8px; border-radius: 10px; text-align: center; font-weight: bold; font-size: 16px; order: 2;
+        }
+        .del-btn { background: none; border: none; cursor: pointer; font-size: 20px; opacity: 0.5; }
     </style>
 </head>
 <body>
 
     <div class="navbar">
+        <select id="dayFilter" onchange="render()"><option value="all">ALL DAYS</option></select>
         <button class="menu-btn" onclick="toggleMenu()">☰</button>
-        <select id="dayFilter" onchange="render()">
-            <option value="all">عرض الكل</option>
-        </select>
     </div>
 
     <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
     <div class="drawer" id="drawer">
-        <h3 style="color:var(--neon)">تمرين جديد ➕</h3>
-        <input type="text" id="dayInput" placeholder="اسم اليوم (مثلاً: PUSH)">
-        <input type="text" id="exInput" placeholder="اسم التمرين">
-        <div style="display: flex; gap: 10px;">
-            <input type="number" id="weightInput" placeholder="الوزن">
-            <input type="number" id="setsInput" placeholder="الجلسات">
+        <h3 style="color:var(--neon)">ADD EXERCISE ➕</h3>
+        <input type="text" id="dayInput" placeholder="Day Name (e.g. PUSH)">
+        <input type="text" id="exInput" placeholder="Exercise Name">
+        <div style="display: flex; gap: 5px;">
+            <input type="number" id="weightInput" placeholder="Weight">
+            <input type="number" id="setsInput" placeholder="Sets">
+            <input type="number" id="repsInput" placeholder="Reps">
         </div>
-        <button class="btn-add" onclick="addExercise()">حفظ في الجدول</button>
-        <button onclick="toggleMenu()" style="background:none; border:none; color:#555; width:100%; margin-top:20px;">إغلاق ×</button>
+        <button class="btn-add" onclick="addExercise()">SAVE</button>
     </div>
 
     <div class="container" id="mainDisplay"></div>
@@ -99,8 +106,9 @@
             const ex = document.getElementById('exInput').value.trim();
             const weight = document.getElementById('weightInput').value || 0;
             const sets = document.getElementById('setsInput').value || 0;
+            const reps = document.getElementById('repsInput').value || 0;
             if(!ex) return;
-            gymData.push({ id: Date.now(), day, ex, weight, sets, done: false });
+            gymData.push({ id: Date.now(), day, ex, weight, sets, reps, done: false });
             saveAndRender();
             document.getElementById('exInput').value = "";
             toggleMenu();
@@ -119,7 +127,7 @@
         }
 
         function deleteItem(id) {
-            if(confirm("حذف؟")) {
+            if(confirm("Delete Exercise?")) {
                 gymData = gymData.filter(item => item.id !== id);
                 saveAndRender();
             }
@@ -135,10 +143,8 @@
             const filter = document.getElementById('dayFilter');
             const currentVal = filter.value;
             const days = [...new Set(gymData.map(item => item.day))];
-            filter.innerHTML = '<option value="all">عرض الكل</option>';
-            days.forEach(day => {
-                filter.innerHTML += `<option value="${day}">${day}</option>`;
-            });
+            filter.innerHTML = '<option value="all">ALL DAYS</option>';
+            days.forEach(day => { filter.innerHTML += `<option value="${day}">${day}</option>`; });
             filter.value = currentVal;
         }
 
@@ -146,38 +152,30 @@
             const container = document.getElementById('mainDisplay');
             const selectedDay = document.getElementById('dayFilter').value;
             container.innerHTML = '';
-
             let filteredData = selectedDay === 'all' ? gymData : gymData.filter(d => d.day === selectedDay);
-
-            const groups = filteredData.reduce((acc, obj) => {
-                acc[obj.day] = acc[obj.day] || [];
-                acc[obj.day].push(obj);
-                return acc;
-            }, {});
+            const groups = filteredData.reduce((acc, obj) => { acc[obj.day] = acc[obj.day] || []; acc[obj.day].push(obj); return acc; }, {});
 
             for (const day in groups) {
                 let html = `<div class="day-group"><div class="day-label">${day}</div>`;
                 groups[day].forEach(item => {
                     html += `
                         <div class="ex-card ${item.done ? 'completed' : ''}">
-                            <div class="check-circle" onclick="toggleDone(${item.id})"></div>
-                            <div class="info">
+                            <div class="top-row">
                                 <span class="ex-name">${item.ex}</span>
-                                <div class="edit-fields">
-                                    <input type="number" value="${item.weight}" onchange="updateData(${item.id}, 'weight', this.value)">
-                                    <span class="unit">KG</span>
-                                    <input type="number" value="${item.sets}" onchange="updateData(${item.id}, 'sets', this.value)">
-                                    <span class="unit">SETS</span>
-                                </div>
+                                <div class="check-box" onclick="toggleDone(${item.id})"></div>
                             </div>
-                            <button class="del-icon" onclick="deleteItem(${item.id})">🗑️</button>
+                            <div class="controls-grid">
+                                <div class="edit-item"><label>SETS</label><input type="number" value="${item.sets}" onchange="updateData(${item.id}, 'sets', this.value)"></div>
+                                <div class="edit-item"><label>KG</label><input type="number" value="${item.weight}" onchange="updateData(${item.id}, 'weight', this.value)"></div>
+                                <div class="edit-item"><label>RPS</label><input type="number" value="${item.reps || 0}" onchange="updateData(${item.id}, 'reps', this.value)"></div>
+                                <button class="del-btn" onclick="deleteItem(${item.id})" style="margin-left: auto;">🗑️</button>
+                            </div>
                         </div>`;
                 });
                 html += `</div>`;
                 container.innerHTML += html;
             }
         }
-
         updateFilterOptions();
         render();
     </script>
