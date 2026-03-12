@@ -3,13 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GYM TRACKER PRO 🧪</title>
+    <title>GYM TRACKER 🧪</title>
     <style>
         :root {
             --bg: #000000; --card: #111111; --neon: #ccff00; 
             --text: #ffffff; --drawer-bg: #151515; --input-bg: #080808;
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 0; margin: 0; }
+        
+        /* فرض الأرقام الإنجليزية */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            padding: 0; margin: 0; 
+            font-variant-numeric: lining-nums tabular-nums; /* تضمن ظهور الأرقام اللاتينية */
+        }
         
         /* Navbar */
         .navbar { 
@@ -17,9 +25,12 @@
             border-bottom: 2px solid var(--neon); position: sticky; top: 0; z-index: 100; gap: 10px;
         }
         .menu-btn { font-size: 28px; cursor: pointer; color: var(--neon); background: none; border: none; order: 2; }
+        .nav-logo { font-weight: 900; color: var(--neon); font-size: 1.2rem; margin-right: auto; order: 0; }
+        
         #dayFilter {
             background: #111; color: var(--neon); border: 1px solid var(--neon);
-            padding: 8px; border-radius: 8px; flex-grow: 1; outline: none; font-weight: bold; order: 1;
+            padding: 8px; border-radius: 8px; flex-grow: 1; outline: none; font-weight: bold; order: 1; margin: 0 10px;
+            font-family: inherit;
         }
 
         /* Drawer */
@@ -32,7 +43,7 @@
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 999; }
         .overlay.show { display: block; }
 
-        .drawer input { background: #222; color: white; border: 1px solid #444; padding: 12px; margin: 10px 0; width: 100%; border-radius: 10px; box-sizing: border-box; }
+        .drawer input { background: #222; color: white; border: 1px solid #444; padding: 12px; margin: 10px 0; width: 100%; border-radius: 10px; box-sizing: border-box; font-family: inherit; }
         .btn-add { background: var(--neon); color: black; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: 900; cursor: pointer; }
 
         /* Training Display */
@@ -67,6 +78,7 @@
         .edit-item input { 
             width: 70px; background: var(--input-bg); color: var(--neon); border: none; 
             padding: 8px; border-radius: 10px; text-align: center; font-weight: bold; font-size: 16px; order: 2;
+            font-family: inherit;
         }
         .del-btn { background: none; border: none; cursor: pointer; font-size: 20px; opacity: 0.5; }
     </style>
@@ -74,6 +86,7 @@
 <body>
 
     <div class="navbar">
+        <div class="nav-logo">TRACKER</div>
         <select id="dayFilter" onchange="render()"><option value="all">ALL DAYS</option></select>
         <button class="menu-btn" onclick="toggleMenu()">☰</button>
     </div>
