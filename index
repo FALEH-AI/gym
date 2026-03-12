@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Pro 🧪</title>
+    <style>
+        :root {
+            --bg: #000000; --card: #111111; --neon: #ccff00; 
+            --text: #ffffff; --drawer-bg: #151515;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 0; margin: 0; }
+        
+        /* الهيدر المحسن مع الفلتر */
+        .navbar { 
+            background: var(--card); padding: 10px 15px; display: flex; align-items: center; 
+            border-bottom: 2px solid var(--neon); position: sticky; top: 0; z-index: 100; gap: 10px;
+        }
+        .menu-btn { font-size: 28px; cursor: pointer; color: var(--neon); background: none; border: none; padding: 0; }
+        
+        /* تصميم الفلتر */
+        #dayFilter {
+            background: #222; color: var(--neon); border: 1px solid var(--neon);
+            padding: 8px; border-radius: 8px; font-weight: bold; flex-grow: 1; outline: none;
+        }
+
+        /* المنيو الجانبي */
+        .drawer { 
+            position: fixed; top: 0; right: -100%; width: 85%; height: 100%; 
+            background: var(--drawer-bg); z-index: 1000; transition: 0.4s ease;
+            padding: 25px; box-sizing: border-box; border-left: 1px solid var(--neon);
+        }
+        .drawer.open { right: 0; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 999; }
+        .overlay.show { display: block; }
+
+        input { background: #222; color: white; border: 1px solid #444; padding: 12px; margin: 10px 0; width: 100%; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
+        .btn-add { background: var(--neon); color: black; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: 900; cursor: pointer; }
+
+        /* عرض التمارين */
+        .container { padding: 20px; }
+        .day-group { margin-bottom: 30px; }
+        .day-label { 
+            background: var(--neon); color: black; padding: 6px 14px; border-radius: 6px; 
+            font-size: 13px; font-weight: 900; display: inline-block; margin-bottom: 15px;
+        }
+        
+        .ex-card { 
+            background: var(--card); padding: 15px; border-radius: 15px; 
+            display: flex; align-items: center; gap: 12px; margin-bottom: 10px; border: 1px solid #222;
+        }
+        .ex-card.completed { opacity: 0.3; filter: grayscale(1); }
+        .check-circle { width: 28px; height: 28px; border: 2px solid var(--neon); border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .completed .check-circle { background: var(--neon); color: black; }
+        .completed .check-circle::after { content: "✓"; font-weight: 900; }
+
+        .info { flex-grow: 1; }
+        .ex-name { font-weight: bold; font-size: 17px; display: block; margin-bottom: 5px; }
+        .edit-fields { display: flex; gap: 8px; }
+        .edit-fields input { width: 60px; padding: 5px; text-align: center; margin: 0; color: var(--neon); font-weight: bold; background: #000; border: 1px solid #333; }
+        .unit { font-size: 11px; color: #666; align-self: center; }
+        .del-icon { color: #ff3333; background: none; border: none; font-size: 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+        <select id="dayFilter" onchange="render()">
+            <option value="all">عرض الكل</option>
+        </select>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+    <div class="drawer" id="drawer">
+        <h3 style="color:var(--neon)">تمرين جديد ➕</h3>
+        <input type="text" id="dayInput" placeholder="اسم اليوم (مثلاً: PUSH)">
+        <input type="text" id="exInput" placeholder="اسم التمرين">
+        <div style="display: flex; gap: 10px;">
+            <input type="number" id="weightInput" placeholder="الوزن">
+            <input type="number" id="setsInput" placeholder="الجلسات">
+        </div>
+        <button class="btn-add" onclick="addExercise()">حفظ في الجدول</button>
+        <button onclick="toggleMenu()" style="background:none; border:none; color:#555; width:100%; margin-top:20px;">إغلاق ×</button>
+    </div>
+
+    <div class="container" id="mainDisplay"></div>
+
+    <script>
+        let gymData = JSON.parse(localStorage.getItem('gymData')) || [];
+
+        function toggleMenu() {
+            document.getElementById('drawer').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('show');
+        }
+
+        function addExercise() {
+            const day = document.getElementById('dayInput').value.trim().toUpperCase() || "GENERAL";
+            const ex = document.getElementById('exInput').value.trim();
+            const weight = document.getElementById('weightInput').value || 0;
+            const sets = document.getElementById('setsInput').value || 0;
+            if(!ex) return;
+            gymData.push({ id: Date.now(), day, ex, weight, sets, done: false });
+            saveAndRender();
+            document.getElementById('exInput').value = "";
+            toggleMenu();
+        }
+
+        function updateData(id, field, value) {
+            const index = gymData.findIndex(item => item.id === id);
+            gymData[index][field] = value;
+            localStorage.setItem('gymData', JSON.stringify(gymData));
+        }
+
+        function toggleDone(id) {
+            const index = gymData.findIndex(item => item.id === id);
+            gymData[index].done = !gymData[index].done;
+            saveAndRender();
+        }
+
+        function deleteItem(id) {
+            if(confirm("حذف؟")) {
+                gymData = gymData.filter(item => item.id !== id);
+                saveAndRender();
+            }
+        }
+
+        function saveAndRender() {
+            localStorage.setItem('gymData', JSON.stringify(gymData));
+            updateFilterOptions();
+            render();
+        }
+
+        function updateFilterOptions() {
+            const filter = document.getElementById('dayFilter');
+            const currentVal = filter.value;
+            const days = [...new Set(gymData.map(item => item.day))];
+            filter.innerHTML = '<option value="all">عرض الكل</option>';
+            days.forEach(day => {
+                filter.innerHTML += `<option value="${day}">${day}</option>`;
+            });
+            filter.value = currentVal;
+        }
+
+        function render() {
+            const container = document.getElementById('mainDisplay');
+            const selectedDay = document.getElementById('dayFilter').value;
+            container.innerHTML = '';
+
+            let filteredData = selectedDay === 'all' ? gymData : gymData.filter(d => d.day === selectedDay);
+
+            const groups = filteredData.reduce((acc, obj) => {
+                acc[obj.day] = acc[obj.day] || [];
+                acc[obj.day].push(obj);
+                return acc;
+            }, {});
+
+            for (const day in groups) {
+                let html = `<div class="day-group"><div class="day-label">${day}</div>`;
+                groups[day].forEach(item => {
+                    html += `
+                        <div class="ex-card ${item.done ? 'completed' : ''}">
+                            <div class="check-circle" onclick="toggleDone(${item.id})"></div>
+                            <div class="info">
+                                <span class="ex-name">${item.ex}</span>
+                                <div class="edit-fields">
+                                    <input type="number" value="${item.weight}" onchange="updateData(${item.id}, 'weight', this.value)">
+                                    <span class="unit">KG</span>
+                                    <input type="number" value="${item.sets}" onchange="updateData(${item.id}, 'sets', this.value)">
+                                    <span class="unit">SETS</span>
+                                </div>
+                            </div>
+                            <button class="del-icon" onclick="deleteItem(${item.id})">🗑️</button>
+                        </div>`;
+                });
+                html += `</div>`;
+                container.innerHTML += html;
+            }
+        }
+
+        updateFilterOptions();
+        render();
+    </script>
+</body>
+</html>
