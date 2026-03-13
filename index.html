@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TRACKER ELITE V6 🧪</title>
+    <title>TRACKER FIXED V8 🧪</title>
     <style>
         :root { --bg: #000000; --card: #111111; --neon: #ccff00; --text: #ffffff; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
@@ -17,15 +17,15 @@
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; z-index: 999; }
         .overlay.show { display: block; }
 
-        .sidebar-h { color: var(--neon); font-size: 11px; font-weight: 900; margin-bottom: 12px; opacity: 0.8; letter-spacing: 1px; }
+        .sidebar-h { color: var(--neon); font-size: 11px; font-weight: 900; margin-bottom: 12px; opacity: 0.8; }
         .color-picker-container { display: flex; align-items: center; gap: 15px; background: #111; padding: 12px; border-radius: 12px; border: 1px solid #222; margin-bottom: 25px; }
         #colorPicker { width: 45px; height: 45px; border: none; background: none; cursor: pointer; }
 
         .folder-item { padding: 14px; background: #111; border-radius: 12px; margin-bottom: 10px; cursor: pointer; border: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
-        .folder-item.active { border-color: var(--neon); background: #1a1a1a; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .folder-item.active { border-color: var(--neon); background: #1a1a1a; }
         
         .tab-bar { display: flex; overflow-x: auto; background: #050505; padding: 12px; gap: 8px; border-bottom: 1px solid #1a1a1a; scrollbar-width: none; min-height: 45px; }
-        .tab { padding: 10px 20px; background: #111; border: 1px solid #222; border-radius: 8px; color: #444; cursor: pointer; white-space: nowrap; font-weight: 900; font-size: 11px; text-transform: uppercase; }
+        .tab { padding: 10px 20px; background: #111; border: 1px solid #222; border-radius: 8px; color: #444; cursor: pointer; white-space: nowrap; font-weight: 900; font-size: 11px; }
         .tab.active { border-color: var(--neon); color: var(--neon); }
 
         .container { padding: 20px; padding-bottom: 120px; }
@@ -67,14 +67,12 @@
             <input type="color" id="colorPicker" oninput="changeColor(this.value)">
             <span id="colorHex" style="font-family:monospace; font-size:13px; font-weight:bold;">#CCFF00</span>
         </div>
-
         <div class="sidebar-h">MY TRAINING PLANS 📂</div>
         <div id="folderList"></div>
         <button class="btn" style="background:#1a1a1a; color:var(--neon); border:1px solid var(--neon);" onclick="addFolder()">+ CREATE NEW PLAN</button>
-
         <div class="sidebar-h" style="margin-top:25px;">SYSTEM</div>
-        <button class="btn" onclick="exportHub()">EXPORT ALL DATA</button>
-        <button class="btn" style="background:#111; color:white; border:1px solid #333; margin-top:8px;" onclick="importHub()">IMPORT DATA</button>
+        <button class="btn" onclick="exportHub()">EXPORT HUB</button>
+        <button class="btn" style="background:#111; color:white; border:1px solid #333; margin-top:8px;" onclick="importHub()">IMPORT HUB</button>
     </div>
 
     <div id="tabBar" class="tab-bar"></div>
@@ -95,29 +93,30 @@
     </div>
 
     <script>
-        // دمج شامل لضمان استرجاع كل النسخ القديمة
-        function getCombinedData() {
-            const keys = ['gym_hub', 'gym_hub_v2', 'gym_hub_v3', 'gym_hub_v4'];
-            let mergedFolders = {};
+        // دالة تحميل البيانات الشاملة
+        function loadData() {
+            const keys = ['gym_hub_v4', 'gym_hub_v3', 'gym_hub_v2', 'gym_hub'];
+            let combinedFolders = {};
             let theme = '#ccff00';
-            
-            keys.forEach(k => {
-                let d = JSON.parse(localStorage.getItem(k));
-                if(d && d.folders) {
-                    mergedFolders = { ...mergedFolders, ...d.folders };
-                    if(d.themeColor) theme = d.themeColor;
-                }
-            });
+            let activeF = null;
+            let activeD = null;
 
-            return {
-                activeFolder: Object.keys(mergedFolders)[0] || null,
-                activeDay: null,
-                folders: mergedFolders,
-                themeColor: theme
-            };
+            for(let key of keys) {
+                let d = JSON.parse(localStorage.getItem(key));
+                if(d && d.folders) {
+                    combinedFolders = { ...combinedFolders, ...d.folders };
+                    if(key === 'gym_hub_v4') {
+                        theme = d.themeColor || theme;
+                        activeF = d.activeFolder;
+                        activeD = d.activeDay;
+                    }
+                }
+            }
+            if(!activeF) activeF = Object.keys(combinedFolders)[0] || null;
+            return { folders: combinedFolders, themeColor: theme, activeFolder: activeF, activeDay: activeD };
         }
 
-        let hub = getCombinedData();
+        let hub = loadData();
 
         function applyTheme() {
             document.documentElement.style.setProperty('--neon', hub.themeColor);
@@ -127,13 +126,7 @@
 
         function saveAll() {
             localStorage.setItem('gym_hub_v4', JSON.stringify(hub));
-            render(); // التحديث الفوري هنا
-        }
-
-        function changeColor(val) {
-            hub.themeColor = val;
-            applyTheme();
-            saveAll();
+            render();
         }
 
         function toggleSidebar() {
@@ -143,13 +136,19 @@
         }
 
         function toggleModal() {
-            if(!hub.activeFolder) return alert("Please select or create a plan first!");
+            if(!hub.activeFolder) return alert("Select a plan first!");
             document.getElementById('modal').classList.toggle('open');
             if(hub.activeDay) document.getElementById('dayIn').value = hub.activeDay;
         }
 
+        function changeColor(val) {
+            hub.themeColor = val;
+            applyTheme();
+            saveAll();
+        }
+
         function addFolder() {
-            let name = prompt("Enter Plan Name:");
+            let name = prompt("Plan Name:");
             if(name) {
                 let id = "f" + Date.now();
                 hub.folders[id] = { name: name.toUpperCase(), days: {} };
@@ -157,7 +156,6 @@
                 hub.activeDay = null;
                 saveAll();
                 renderSidebar();
-                alert("Plan Created!");
             }
         }
 
@@ -165,13 +163,11 @@
             let list = document.getElementById('folderList');
             list.innerHTML = "";
             Object.keys(hub.folders).forEach(id => {
-                list.innerHTML += `
-                    <div class="folder-item ${id == hub.activeFolder ? 'active' : ''}" onclick="selectFolder('${id}')">
-                        <span>${hub.folders[id].name}</span>
-                        <span onclick="event.stopPropagation(); deleteFolder('${id}')" style="color:#ff4444;">🗑️</span>
-                    </div>`;
+                list.innerHTML += `<div class="folder-item ${id == hub.activeFolder ? 'active' : ''}" onclick="selectFolder('${id}')">
+                    <span>${hub.folders[id].name}</span>
+                    <span onclick="event.stopPropagation(); deleteFolder('${id}')" style="color:#ff4444;">🗑️</span>
+                </div>`;
             });
-            applyTheme(); // نضمن تحديث لون مختار الألوان داخل القائمة
         }
 
         function selectFolder(id) {
@@ -183,23 +179,29 @@
         }
 
         function saveExercise() {
-            let day = document.getElementById('dayIn').value.toUpperCase();
-            let name = document.getElementById('exIn').value;
-            if(!day || !name) return;
+            let day = document.getElementById('dayIn').value.trim().toUpperCase();
+            let name = document.getElementById('exIn').value.trim();
+            if(!day || !name) return alert("Fill Name and Day!");
             
             if(!hub.folders[hub.activeFolder].days[day]) hub.folders[hub.activeFolder].days[day] = [];
+            
             hub.folders[hub.activeFolder].days[day].push({
-                name, sets: document.getElementById('setIn').value || 0,
+                name, 
+                sets: document.getElementById('setIn').value || 0,
                 weight: document.getElementById('kgIn').value || 0,
-                reps: document.getElementById('repIn').value || 0, done: false
+                reps: document.getElementById('repIn').value || 0,
+                done: false
             });
             
             hub.activeDay = day;
             saveAll();
+            
+            // تصفير الخانات مع بقاء اليوم
             document.getElementById('exIn').value = "";
             document.getElementById('setIn').value = "";
             document.getElementById('kgIn').value = "";
             document.getElementById('repIn').value = "";
+            document.getElementById('modal').classList.remove('open');
         }
 
         function render() {
@@ -208,18 +210,14 @@
             const folderTitle = document.getElementById('folderTitle');
 
             if(!hub.activeFolder || !hub.folders[hub.activeFolder]) {
-                main.innerHTML = `<div style="text-align:center; margin-top:100px; color:#333; font-weight:900;">OPEN MENU ☰ TO CREATE YOUR PLAN</div>`;
-                tabBar.innerHTML = "";
-                folderTitle.innerText = "TRACKER";
+                main.innerHTML = `<div style="text-align:center; margin-top:100px; color:#444;">OPEN MENU ☰</div>`;
                 return;
             }
 
             let folder = hub.folders[hub.activeFolder];
             folderTitle.innerText = folder.name;
-
             tabBar.innerHTML = "";
-            let days = Object.keys(folder.days);
-            days.forEach(day => {
+            Object.keys(folder.days).forEach(day => {
                 tabBar.innerHTML += `<div class="tab ${day === hub.activeDay ? 'active' : ''}" onclick="hub.activeDay='${day}'; saveAll();">${day}</div>`;
             });
 
@@ -246,7 +244,7 @@
         function toggleDone(idx) { hub.folders[hub.activeFolder].days[hub.activeDay][idx].done = !hub.folders[hub.activeFolder].days[hub.activeDay][idx].done; saveAll(); }
         function updateEx(idx, f, v) { hub.folders[hub.activeFolder].days[hub.activeDay][idx][f] = v; saveAll(); }
         function deleteEx(idx) { if(confirm("Delete exercise?")) { hub.folders[hub.activeFolder].days[hub.activeDay].splice(idx,1); saveAll(); } }
-        function deleteFolder(id) { if(confirm("Delete entire plan?")) { delete hub.folders[id]; hub.activeFolder = Object.keys(hub.folders)[0] || null; saveAll(); renderSidebar(); } }
+        function deleteFolder(id) { if(confirm("Delete plan?")) { delete hub.folders[id]; hub.activeFolder = Object.keys(hub.folders)[0] || null; saveAll(); renderSidebar(); } }
         function exportHub() { navigator.clipboard.writeText(btoa(unescape(encodeURIComponent(JSON.stringify(hub))))).then(() => alert("COPIED!")); }
         function importHub() { let code = prompt("Paste code:"); if(code) { hub = JSON.parse(decodeURIComponent(escape(atob(code)))); applyTheme(); saveAll(); } }
 
