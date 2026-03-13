@@ -2,194 +2,234 @@
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TRACKER 🧪</title>
-    
-    <link rel="manifest" href="data:application/manifest+json,{'name':'Tracker','short_name':'Tracker','start_url':'.','display':'standalone','background_color':'#000000','theme_color':'#ccff00'}">
-
     <style>
-        :root {
-            --bg: #000000; --card: #111111; --neon: #ccff00; 
-            --text: #ffffff; --drawer-bg: #151515; --input-bg: #080808;
-        }
-        body { 
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
-            background: var(--bg); color: var(--text); padding: 0; margin: 0; 
-            font-variant-numeric: lining-nums tabular-nums;
-            -webkit-tap-highlight-color: transparent;
-        }
+        :root { --bg: #000000; --card: #111111; --neon: #ccff00; --text: #ffffff; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
         
-        /* Navbar */
-        .navbar { 
-            background: var(--card); padding: env(safe-area-inset-top) 15px 10px 15px; 
-            display: flex; align-items: center; border-bottom: 2px solid var(--neon); 
-            position: sticky; top: 0; z-index: 100; gap: 10px;
-        }
-        .menu-btn { font-size: 28px; cursor: pointer; color: var(--neon); background: none; border: none; order: 2; }
-        .nav-logo { font-weight: 900; color: var(--neon); font-size: 1.2rem; margin-right: auto; order: 0; }
-        
-        #dayFilter {
-            background: #111; color: var(--neon); border: 1px solid var(--neon);
-            padding: 8px; border-radius: 8px; flex-grow: 1; outline: none; font-weight: bold; order: 1; margin: 0 10px;
-        }
+        .navbar { background: var(--card); padding: 15px; display: flex; align-items: center; border-bottom: 2px solid var(--neon); position: sticky; top: 0; z-index: 100; }
+        .menu-btn { font-size: 24px; background: none; border: none; color: var(--neon); cursor: pointer; margin-right: 15px; }
+        .nav-logo { font-weight: 900; color: var(--neon); font-size: 1.2rem; flex-grow: 1; text-transform: uppercase; }
 
-        /* Drawer */
-        .drawer { 
-            position: fixed; top: 0; left: -100%; width: 85%; height: 100%; 
-            background: var(--drawer-bg); z-index: 1000; transition: 0.4s ease;
-            padding: 40px 25px 25px 25px; box-sizing: border-box; border-right: 1px solid var(--neon);
-        }
-        .drawer.open { left: 0; }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 999; }
+        .sidebar { position: fixed; top: 0; left: -300px; width: 300px; height: 100%; background: #080808; z-index: 1000; transition: 0.3s; padding: 25px; box-sizing: border-box; border-right: 1px solid var(--neon); overflow-y: auto; }
+        .sidebar.open { left: 0; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; z-index: 999; }
         .overlay.show { display: block; }
 
-        .drawer input { background: #222; color: white; border: 1px solid #444; padding: 12px; margin: 10px 0; width: 100%; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
-        .btn-add { background: var(--neon); color: black; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: 900; cursor: pointer; }
+        .sidebar-h { color: var(--neon); font-size: 11px; font-weight: 900; margin-bottom: 12px; opacity: 0.8; }
+        .color-picker-container { display: flex; align-items: center; gap: 15px; background: #111; padding: 12px; border-radius: 12px; border: 1px solid #222; margin-bottom: 25px; }
+        #colorPicker { width: 45px; height: 45px; border: none; background: none; cursor: pointer; }
 
-        /* Training Display */
-        .container { padding: 20px; padding-bottom: 50px; }
-        .day-group { margin-bottom: 30px; }
-        .day-label { 
-            background: var(--neon); color: black; padding: 6px 16px; border-radius: 8px; 
-            font-size: 14px; font-weight: 900; display: inline-block; margin-bottom: 15px;
-            text-transform: uppercase;
-        }
+        .folder-item { padding: 14px; background: #111; border-radius: 12px; margin-bottom: 10px; cursor: pointer; border: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
+        .folder-item.active { border-color: var(--neon); background: #1a1a1a; }
         
-        .ex-card { 
-            background: var(--card); padding: 20px; border-radius: 20px; 
-            margin-bottom: 15px; border: 1px solid #222;
-        }
-        .ex-card.completed { opacity: 0.3; filter: grayscale(1); }
+        .tab-bar { display: flex; overflow-x: auto; background: #050505; padding: 12px; gap: 8px; border-bottom: 1px solid #1a1a1a; scrollbar-width: none; }
+        .tab { padding: 10px 20px; background: #111; border: 1px solid #222; border-radius: 8px; color: #444; cursor: pointer; white-space: nowrap; font-weight: 900; font-size: 11px; }
+        .tab.active { border-color: var(--neon); color: var(--neon); }
 
-        .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .ex-name { font-weight: bold; font-size: 20px; color: var(--neon); }
+        .container { padding: 20px; padding-bottom: 120px; }
+        .ex-card { background: var(--card); padding: 20px; border-radius: 20px; margin-bottom: 15px; border: 1px solid #222; }
+        .ex-card.done { opacity: 0.25; filter: grayscale(1); }
+        .ex-name { font-weight: 900; font-size: 18px; color: var(--neon); display: block; margin-bottom: 15px; }
 
-        .check-box { 
-            width: 38px; height: 38px; border: 2px solid var(--neon); border-radius: 10px; 
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
-        }
-        .completed .check-box { background: var(--neon); color: black; }
-        .completed .check-box::after { content: "✓"; font-weight: 900; font-size: 24px; }
+        .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .input-group { background: #000; padding: 8px 12px; border-radius: 10px; display: flex; align-items: center; gap: 6px; border: 1px solid #1a1a1a; min-width: 80px; }
+        .input-group label { font-size: 9px; color: #555; font-weight: 900; }
+        .input-group input { width: 100%; background: none; border: none; color: var(--neon); text-align: center; font-weight: 900; font-size: 18px; outline: none; }
 
-        .controls-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: flex-start; }
-        .edit-item { display: flex; align-items: center; gap: 6px; }
-        .edit-item label { color: #666; font-size: 11px; font-weight: bold; }
-        .edit-item input { 
-            width: 65px; background: var(--input-bg); color: var(--neon); border: none; 
-            padding: 10px 5px; border-radius: 10px; text-align: center; font-weight: 900; font-size: 16px;
-        }
-        .del-btn { background: none; border: none; cursor: pointer; font-size: 20px; opacity: 0.4; margin-left: auto; }
+        .check-box { width: 45px; height: 45px; border: 2px solid var(--neon); border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-left: auto; }
+        .done .check-box { background: var(--neon); color: black; }
+
+        .fab { position: fixed; bottom: 30px; right: 20px; width: 65px; height: 65px; background: var(--neon); border-radius: 50%; border: none; font-size: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 99; color: black; }
+
+        /* Modal Layout Fix */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); z-index: 2000; display: none; padding: 30px; box-sizing: border-box; flex-direction: column; justify-content: center; }
+        .modal.open { display: flex; }
+        .modal input { width: 100%; padding: 18px; margin: 8px 0; background: #111; border: 1px solid #333; color: white; border-radius: 15px; outline: none; font-size: 16px; box-sizing: border-box; }
+        .modal-row { display: flex; gap: 10px; width: 100%; }
+        .modal-row input { flex: 1; min-width: 0; }
+        .btn { width: 100%; padding: 18px; background: var(--neon); border: none; border-radius: 15px; font-weight: 900; margin-top: 15px; cursor: pointer; color: black; font-size: 16px; }
     </style>
 </head>
 <body>
 
     <div class="navbar">
-        <div class="nav-logo">TRACKER</div>
-        <select id="dayFilter" onchange="render()"><option value="all">ALL DAYS</option></select>
-        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <div class="nav-logo" id="folderTitle">TRACKER</div>
     </div>
 
-    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
-    <div class="drawer" id="drawer">
-        <h3 style="color:var(--neon); margin-bottom:20px;">NEW EXERCISE ➕</h3>
-        <input type="text" id="dayInput" placeholder="Day (e.g. PUSH)">
-        <input type="text" id="exInput" placeholder="Exercise Name">
-        <div style="display: flex; gap: 10px;">
-            <input type="number" id="weightInput" placeholder="KG">
-            <input type="number" id="setsInput" placeholder="Sets">
-            <input type="number" id="repsInput" placeholder="Reps">
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-h">COLOR SETTINGS</div>
+        <div class="color-picker-container">
+            <input type="color" id="colorPicker" oninput="changeColor(this.value)">
+            <span id="colorHex" style="font-family:monospace; font-size:13px;">#CCFF00</span>
         </div>
-        <button class="btn-add" onclick="addExercise()">ADD TO LIST</button>
+
+        <div class="sidebar-h">MY FOLDERS 📂</div>
+        <div id="folderList"></div>
+        <button class="btn" style="background:#1a1a1a; color:var(--neon); border:1px solid var(--neon);" onclick="addFolder()">+ NEW FOLDER</button>
+
+        <div class="sidebar-h" style="margin-top:25px;">DATA</div>
+        <button class="btn" onclick="exportHub()">SHARE HUB</button>
+        <button class="btn" style="background:#111; color:white; border:1px solid #333; margin-top:8px;" onclick="importHub()">IMPORT HUB</button>
     </div>
 
-    <div class="container" id="mainDisplay"></div>
+    <div id="tabBar" class="tab-bar"></div>
+    <div class="container" id="main"></div>
+    <button class="fab" onclick="toggleModal()">+</button>
+
+    <div class="modal" id="modal">
+        <h2 style="color:var(--neon); text-align:center;">ADD EXERCISE</h2>
+        <input type="text" id="dayIn" placeholder="Day (e.g. PUSH)">
+        <input type="text" id="exIn" placeholder="Exercise Name">
+        <div class="modal-row">
+            <input type="number" id="setIn" placeholder="Sets">
+            <input type="number" id="kgIn" placeholder="KG">
+            <input type="number" id="repIn" placeholder="Reps">
+        </div>
+        <button class="btn" onclick="saveExercise()">SAVE TO PLAN</button>
+        <button onclick="toggleModal()" style="background:none; color:#555; border:none; margin-top:20px;">CANCEL</button>
+    </div>
 
     <script>
-        let gymData = JSON.parse(localStorage.getItem('gymData')) || [];
+        let hub = JSON.parse(localStorage.getItem('gym_hub_v4')) || { activeFolder: null, activeDay: null, folders: {}, themeColor: '#ccff00' };
 
-        function toggleMenu() {
-            document.getElementById('drawer').classList.toggle('open');
-            document.getElementById('overlay').classList.toggle('show');
+        function applyTheme() {
+            document.documentElement.style.setProperty('--neon', hub.themeColor);
+            document.getElementById('colorHex').innerText = hub.themeColor.toUpperCase();
+            document.getElementById('colorPicker').value = hub.themeColor;
         }
 
-        function addExercise() {
-            const day = document.getElementById('dayInput').value.trim().toUpperCase() || "GENERAL";
-            const ex = document.getElementById('exInput').value.trim();
-            const weight = document.getElementById('weightInput').value || 0;
-            const sets = document.getElementById('setsInput').value || 0;
-            const reps = document.getElementById('repsInput').value || 0;
-            if(!ex) return;
-            gymData.push({ id: Date.now(), day, ex, weight, sets, reps, done: false });
-            saveAndRender();
-            document.getElementById('exInput').value = "";
-            toggleMenu();
-        }
-
-        function updateData(id, field, value) {
-            const index = gymData.findIndex(item => item.id === id);
-            gymData[index][field] = value;
-            localStorage.setItem('gymData', JSON.stringify(gymData));
-        }
-
-        function toggleDone(id) {
-            const index = gymData.findIndex(item => item.id === id);
-            gymData[index].done = !gymData[index].done;
-            saveAndRender();
-        }
-
-        function deleteItem(id) {
-            if(confirm("Delete this exercise?")) {
-                gymData = gymData.filter(item => item.id !== id);
-                saveAndRender();
-            }
-        }
-
-        function saveAndRender() {
-            localStorage.setItem('gymData', JSON.stringify(gymData));
-            updateFilterOptions();
+        function saveAll() {
+            localStorage.setItem('gym_hub_v4', JSON.stringify(hub));
             render();
         }
 
-        function updateFilterOptions() {
-            const filter = document.getElementById('dayFilter');
-            const currentVal = filter.value;
-            const days = [...new Set(gymData.map(item => item.day))];
-            filter.innerHTML = '<option value="all">ALL DAYS</option>';
-            days.forEach(day => { filter.innerHTML += `<option value="${day}">${day}</option>`; });
-            filter.value = currentVal;
+        function changeColor(val) {
+            hub.themeColor = val;
+            applyTheme();
+            saveAll();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('show');
+            applyTheme();
+            renderSidebar();
+        }
+
+        function toggleModal() {
+            if(!hub.activeFolder) return alert("Select folder!");
+            document.getElementById('modal').classList.toggle('open');
+            if(hub.activeDay) document.getElementById('dayIn').value = hub.activeDay;
+        }
+
+        function saveExercise() {
+            let day = document.getElementById('dayIn').value.toUpperCase();
+            let name = document.getElementById('exIn').value;
+            if(!day || !name) return;
+            
+            if(!hub.folders[hub.activeFolder].days[day]) hub.folders[hub.activeFolder].days[day] = [];
+            hub.folders[hub.activeFolder].days[day].push({
+                name, 
+                sets: document.getElementById('setIn').value || 0,
+                weight: document.getElementById('kgIn').value || 0,
+                reps: document.getElementById('repIn').value || 0,
+                done: false
+            });
+            
+            hub.activeDay = day;
+            saveAll();
+
+            // التصفير المطلوب: مسح كل شيء عدا "اليوم"
+            document.getElementById('exIn').value = "";
+            document.getElementById('setIn').value = "";
+            document.getElementById('kgIn').value = "";
+            document.getElementById('repIn').value = "";
+            
+            // تنبيه بسيط للحظة الحفظ
+            const btn = document.querySelector('.modal .btn');
+            const originalText = btn.innerText;
+            btn.innerText = "SAVED! ADD ANOTHER?";
+            setTimeout(() => btn.innerText = originalText, 1500);
+        }
+
+        function addFolder() {
+            let name = prompt("Name:");
+            if(name) {
+                let id = "f" + Date.now();
+                hub.folders[id] = { name: name.toUpperCase(), days: {} };
+                hub.activeFolder = id;
+                saveAll();
+                toggleSidebar();
+            }
+        }
+
+        function renderSidebar() {
+            let list = document.getElementById('folderList');
+            list.innerHTML = "";
+            Object.keys(hub.folders).forEach(id => {
+                list.innerHTML += `
+                    <div class="folder-item ${id == hub.activeFolder ? 'active' : ''}" onclick="selectFolder('${id}')">
+                        <span>${hub.folders[id].name}</span>
+                        <span onclick="event.stopPropagation(); deleteFolder('${id}')">🗑️</span>
+                    </div>`;
+            });
+        }
+
+        function selectFolder(id) {
+            hub.activeFolder = id;
+            let days = Object.keys(hub.folders[id].days);
+            hub.activeDay = days.length > 0 ? days[0] : null;
+            saveAll();
+            toggleSidebar();
         }
 
         function render() {
-            const container = document.getElementById('mainDisplay');
-            const selectedDay = document.getElementById('dayFilter').value;
-            container.innerHTML = '';
-            let filteredData = selectedDay === 'all' ? gymData : gymData.filter(d => d.day === selectedDay);
-            const groups = filteredData.reduce((acc, obj) => { acc[obj.day] = acc[obj.day] || []; acc[obj.day].push(obj); return acc; }, {});
-
-            for (const day in groups) {
-                let html = `<div class="day-group"><div class="day-label">${day}</div>`;
-                groups[day].forEach(item => {
-                    html += `
-                        <div class="ex-card ${item.done ? 'completed' : ''}">
-                            <div class="top-row">
-                                <span class="ex-name">${item.ex}</span>
-                                <div class="check-box" onclick="toggleDone(${item.id})"></div>
+            const main = document.getElementById('main');
+            const tabBar = document.getElementById('tabBar');
+            const folderTitle = document.getElementById('folderTitle');
+            if(!hub.activeFolder || !hub.folders[hub.activeFolder]) {
+                main.innerHTML = `<div style="text-align:center; margin-top:50px; color:#444;">OPEN MENU ☰</div>`;
+                return;
+            }
+            let folder = hub.folders[hub.activeFolder];
+            folderTitle.innerText = folder.name;
+            tabBar.innerHTML = "";
+            Object.keys(folder.days).forEach(day => {
+                tabBar.innerHTML += `<div class="tab ${day === hub.activeDay ? 'active' : ''}" onclick="hub.activeDay='${day}'; saveAll();">${day}</div>`;
+            });
+            main.innerHTML = "";
+            if(hub.activeDay && folder.days[hub.activeDay]) {
+                folder.days[hub.activeDay].forEach((ex, idx) => {
+                    main.innerHTML += `
+                        <div class="ex-card ${ex.done ? 'done' : ''}">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                                <span class="ex-name">${ex.name}</span>
+                                <div class="check-box" onclick="toggleDone(${idx})"></div>
                             </div>
-                            <div class="controls-grid">
-                                <div class="edit-item"><label>SETS</label><input type="number" value="${item.sets}" onchange="updateData(${item.id}, 'sets', this.value)"></div>
-                                <div class="edit-item"><label>KG</label><input type="number" value="${item.weight}" onchange="updateData(${item.id}, 'weight', this.value)"></div>
-                                <div class="edit-item"><label>RPS</label><input type="number" value="${item.reps || 0}" onchange="updateData(${item.id}, 'reps', this.value)"></div>
-                                <button class="del-btn" onclick="deleteItem(${item.id})">🗑️</button>
+                            <div class="controls">
+                                <div class="input-group"><label>SETS</label><input type="number" value="${ex.sets}" onchange="updateEx(${idx},'sets',this.value)"></div>
+                                <div class="input-group"><label>KG</label><input type="number" value="${ex.weight}" onchange="updateEx(${idx},'weight',this.value)"></div>
+                                <div class="input-group"><label>REPS</label><input type="number" value="${ex.reps || 0}" onchange="updateEx(${idx},'reps',this.value)"></div>
+                                <button onclick="deleteEx(${idx})" style="background:none; border:none; color:red; margin-left:auto;">🗑️</button>
                             </div>
                         </div>`;
                 });
-                html += `</div>`;
-                container.innerHTML += html;
             }
         }
-        updateFilterOptions();
+
+        function toggleDone(idx) { hub.folders[hub.activeFolder].days[hub.activeDay][idx].done = !hub.folders[hub.activeFolder].days[hub.activeDay][idx].done; saveAll(); }
+        function updateEx(idx, f, v) { hub.folders[hub.activeFolder].days[hub.activeDay][idx][f] = v; saveAll(); }
+        function deleteEx(idx) { if(confirm("Delete?")) { hub.folders[hub.activeFolder].days[hub.activeDay].splice(idx,1); saveAll(); } }
+        function deleteFolder(id) { if(confirm("Delete?")) { delete hub.folders[id]; hub.activeFolder = Object.keys(hub.folders)[0]; saveAll(); } }
+        function exportHub() { navigator.clipboard.writeText(btoa(unescape(encodeURIComponent(JSON.stringify(hub))))).then(() => alert("COPIED!")); }
+        function importHub() { let code = prompt("Paste code:"); if(code) { hub = JSON.parse(decodeURIComponent(escape(atob(code)))); applyTheme(); saveAll(); } }
+
+        applyTheme();
         render();
     </script>
 </body>
