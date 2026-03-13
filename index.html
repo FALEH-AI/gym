@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TRACKER 🧪</title>
+    <title>TRACKER ELITE V6 🧪</title>
     <style>
         :root { --bg: #000000; --card: #111111; --neon: #ccff00; --text: #ffffff; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
@@ -17,15 +17,15 @@
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; z-index: 999; }
         .overlay.show { display: block; }
 
-        .sidebar-h { color: var(--neon); font-size: 11px; font-weight: 900; margin-bottom: 12px; opacity: 0.8; }
+        .sidebar-h { color: var(--neon); font-size: 11px; font-weight: 900; margin-bottom: 12px; opacity: 0.8; letter-spacing: 1px; }
         .color-picker-container { display: flex; align-items: center; gap: 15px; background: #111; padding: 12px; border-radius: 12px; border: 1px solid #222; margin-bottom: 25px; }
         #colorPicker { width: 45px; height: 45px; border: none; background: none; cursor: pointer; }
 
         .folder-item { padding: 14px; background: #111; border-radius: 12px; margin-bottom: 10px; cursor: pointer; border: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
-        .folder-item.active { border-color: var(--neon); background: #1a1a1a; }
+        .folder-item.active { border-color: var(--neon); background: #1a1a1a; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
         
-        .tab-bar { display: flex; overflow-x: auto; background: #050505; padding: 12px; gap: 8px; border-bottom: 1px solid #1a1a1a; scrollbar-width: none; }
-        .tab { padding: 10px 20px; background: #111; border: 1px solid #222; border-radius: 8px; color: #444; cursor: pointer; white-space: nowrap; font-weight: 900; font-size: 11px; }
+        .tab-bar { display: flex; overflow-x: auto; background: #050505; padding: 12px; gap: 8px; border-bottom: 1px solid #1a1a1a; scrollbar-width: none; min-height: 45px; }
+        .tab { padding: 10px 20px; background: #111; border: 1px solid #222; border-radius: 8px; color: #444; cursor: pointer; white-space: nowrap; font-weight: 900; font-size: 11px; text-transform: uppercase; }
         .tab.active { border-color: var(--neon); color: var(--neon); }
 
         .container { padding: 20px; padding-bottom: 120px; }
@@ -40,10 +40,10 @@
 
         .check-box { width: 45px; height: 45px; border: 2px solid var(--neon); border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-left: auto; }
         .done .check-box { background: var(--neon); color: black; }
+        .done .check-box::after { content: "✓"; font-weight: 900; font-size: 22px; }
 
-        .fab { position: fixed; bottom: 30px; right: 20px; width: 65px; height: 65px; background: var(--neon); border-radius: 50%; border: none; font-size: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 99; color: black; }
+        .fab { position: fixed; bottom: 30px; right: 20px; width: 65px; height: 65px; background: var(--neon); border-radius: 50%; border: none; font-size: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 99; color: black; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
 
-        /* Modal Layout Fix */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); z-index: 2000; display: none; padding: 30px; box-sizing: border-box; flex-direction: column; justify-content: center; }
         .modal.open { display: flex; }
         .modal input { width: 100%; padding: 18px; margin: 8px 0; background: #111; border: 1px solid #333; color: white; border-radius: 15px; outline: none; font-size: 16px; box-sizing: border-box; }
@@ -62,19 +62,19 @@
     <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
     <div class="sidebar" id="sidebar">
-        <div class="sidebar-h">COLOR SETTINGS</div>
+        <div class="sidebar-h">INTERFACE COLOR</div>
         <div class="color-picker-container">
             <input type="color" id="colorPicker" oninput="changeColor(this.value)">
-            <span id="colorHex" style="font-family:monospace; font-size:13px;">#CCFF00</span>
+            <span id="colorHex" style="font-family:monospace; font-size:13px; font-weight:bold;">#CCFF00</span>
         </div>
 
-        <div class="sidebar-h">MY FOLDERS 📂</div>
+        <div class="sidebar-h">MY TRAINING PLANS 📂</div>
         <div id="folderList"></div>
-        <button class="btn" style="background:#1a1a1a; color:var(--neon); border:1px solid var(--neon);" onclick="addFolder()">+ NEW FOLDER</button>
+        <button class="btn" style="background:#1a1a1a; color:var(--neon); border:1px solid var(--neon);" onclick="addFolder()">+ CREATE NEW PLAN</button>
 
-        <div class="sidebar-h" style="margin-top:25px;">DATA</div>
-        <button class="btn" onclick="exportHub()">SHARE HUB</button>
-        <button class="btn" style="background:#111; color:white; border:1px solid #333; margin-top:8px;" onclick="importHub()">IMPORT HUB</button>
+        <div class="sidebar-h" style="margin-top:25px;">SYSTEM</div>
+        <button class="btn" onclick="exportHub()">EXPORT ALL DATA</button>
+        <button class="btn" style="background:#111; color:white; border:1px solid #333; margin-top:8px;" onclick="importHub()">IMPORT DATA</button>
     </div>
 
     <div id="tabBar" class="tab-bar"></div>
@@ -91,11 +91,33 @@
             <input type="number" id="repIn" placeholder="Reps">
         </div>
         <button class="btn" onclick="saveExercise()">SAVE TO PLAN</button>
-        <button onclick="toggleModal()" style="background:none; color:#555; border:none; margin-top:20px;">CANCEL</button>
+        <button onclick="toggleModal()" style="background:none; color:#555; border:none; margin-top:20px; font-weight:bold;">CANCEL</button>
     </div>
 
     <script>
-        let hub = JSON.parse(localStorage.getItem('gym_hub_v4')) || { activeFolder: null, activeDay: null, folders: {}, themeColor: '#ccff00' };
+        // دمج شامل لضمان استرجاع كل النسخ القديمة
+        function getCombinedData() {
+            const keys = ['gym_hub', 'gym_hub_v2', 'gym_hub_v3', 'gym_hub_v4'];
+            let mergedFolders = {};
+            let theme = '#ccff00';
+            
+            keys.forEach(k => {
+                let d = JSON.parse(localStorage.getItem(k));
+                if(d && d.folders) {
+                    mergedFolders = { ...mergedFolders, ...d.folders };
+                    if(d.themeColor) theme = d.themeColor;
+                }
+            });
+
+            return {
+                activeFolder: Object.keys(mergedFolders)[0] || null,
+                activeDay: null,
+                folders: mergedFolders,
+                themeColor: theme
+            };
+        }
+
+        let hub = getCombinedData();
 
         function applyTheme() {
             document.documentElement.style.setProperty('--neon', hub.themeColor);
@@ -105,7 +127,7 @@
 
         function saveAll() {
             localStorage.setItem('gym_hub_v4', JSON.stringify(hub));
-            render();
+            render(); // التحديث الفوري هنا
         }
 
         function changeColor(val) {
@@ -117,54 +139,25 @@
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('overlay').classList.toggle('show');
-            applyTheme();
             renderSidebar();
         }
 
         function toggleModal() {
-            if(!hub.activeFolder) return alert("Select folder!");
+            if(!hub.activeFolder) return alert("Please select or create a plan first!");
             document.getElementById('modal').classList.toggle('open');
             if(hub.activeDay) document.getElementById('dayIn').value = hub.activeDay;
         }
 
-        function saveExercise() {
-            let day = document.getElementById('dayIn').value.toUpperCase();
-            let name = document.getElementById('exIn').value;
-            if(!day || !name) return;
-            
-            if(!hub.folders[hub.activeFolder].days[day]) hub.folders[hub.activeFolder].days[day] = [];
-            hub.folders[hub.activeFolder].days[day].push({
-                name, 
-                sets: document.getElementById('setIn').value || 0,
-                weight: document.getElementById('kgIn').value || 0,
-                reps: document.getElementById('repIn').value || 0,
-                done: false
-            });
-            
-            hub.activeDay = day;
-            saveAll();
-
-            // التصفير المطلوب: مسح كل شيء عدا "اليوم"
-            document.getElementById('exIn').value = "";
-            document.getElementById('setIn').value = "";
-            document.getElementById('kgIn').value = "";
-            document.getElementById('repIn').value = "";
-            
-            // تنبيه بسيط للحظة الحفظ
-            const btn = document.querySelector('.modal .btn');
-            const originalText = btn.innerText;
-            btn.innerText = "SAVED! ADD ANOTHER?";
-            setTimeout(() => btn.innerText = originalText, 1500);
-        }
-
         function addFolder() {
-            let name = prompt("Name:");
+            let name = prompt("Enter Plan Name:");
             if(name) {
                 let id = "f" + Date.now();
                 hub.folders[id] = { name: name.toUpperCase(), days: {} };
                 hub.activeFolder = id;
+                hub.activeDay = null;
                 saveAll();
-                toggleSidebar();
+                renderSidebar();
+                alert("Plan Created!");
             }
         }
 
@@ -175,9 +168,10 @@
                 list.innerHTML += `
                     <div class="folder-item ${id == hub.activeFolder ? 'active' : ''}" onclick="selectFolder('${id}')">
                         <span>${hub.folders[id].name}</span>
-                        <span onclick="event.stopPropagation(); deleteFolder('${id}')">🗑️</span>
+                        <span onclick="event.stopPropagation(); deleteFolder('${id}')" style="color:#ff4444;">🗑️</span>
                     </div>`;
             });
+            applyTheme(); // نضمن تحديث لون مختار الألوان داخل القائمة
         }
 
         function selectFolder(id) {
@@ -188,20 +182,47 @@
             toggleSidebar();
         }
 
+        function saveExercise() {
+            let day = document.getElementById('dayIn').value.toUpperCase();
+            let name = document.getElementById('exIn').value;
+            if(!day || !name) return;
+            
+            if(!hub.folders[hub.activeFolder].days[day]) hub.folders[hub.activeFolder].days[day] = [];
+            hub.folders[hub.activeFolder].days[day].push({
+                name, sets: document.getElementById('setIn').value || 0,
+                weight: document.getElementById('kgIn').value || 0,
+                reps: document.getElementById('repIn').value || 0, done: false
+            });
+            
+            hub.activeDay = day;
+            saveAll();
+            document.getElementById('exIn').value = "";
+            document.getElementById('setIn').value = "";
+            document.getElementById('kgIn').value = "";
+            document.getElementById('repIn').value = "";
+        }
+
         function render() {
             const main = document.getElementById('main');
             const tabBar = document.getElementById('tabBar');
             const folderTitle = document.getElementById('folderTitle');
+
             if(!hub.activeFolder || !hub.folders[hub.activeFolder]) {
-                main.innerHTML = `<div style="text-align:center; margin-top:50px; color:#444;">OPEN MENU ☰</div>`;
+                main.innerHTML = `<div style="text-align:center; margin-top:100px; color:#333; font-weight:900;">OPEN MENU ☰ TO CREATE YOUR PLAN</div>`;
+                tabBar.innerHTML = "";
+                folderTitle.innerText = "TRACKER";
                 return;
             }
+
             let folder = hub.folders[hub.activeFolder];
             folderTitle.innerText = folder.name;
+
             tabBar.innerHTML = "";
-            Object.keys(folder.days).forEach(day => {
+            let days = Object.keys(folder.days);
+            days.forEach(day => {
                 tabBar.innerHTML += `<div class="tab ${day === hub.activeDay ? 'active' : ''}" onclick="hub.activeDay='${day}'; saveAll();">${day}</div>`;
             });
+
             main.innerHTML = "";
             if(hub.activeDay && folder.days[hub.activeDay]) {
                 folder.days[hub.activeDay].forEach((ex, idx) => {
@@ -215,7 +236,7 @@
                                 <div class="input-group"><label>SETS</label><input type="number" value="${ex.sets}" onchange="updateEx(${idx},'sets',this.value)"></div>
                                 <div class="input-group"><label>KG</label><input type="number" value="${ex.weight}" onchange="updateEx(${idx},'weight',this.value)"></div>
                                 <div class="input-group"><label>REPS</label><input type="number" value="${ex.reps || 0}" onchange="updateEx(${idx},'reps',this.value)"></div>
-                                <button onclick="deleteEx(${idx})" style="background:none; border:none; color:red; margin-left:auto;">🗑️</button>
+                                <button onclick="deleteEx(${idx})" style="background:none; border:none; color:#ff4444; margin-left:auto; font-size:22px;">🗑️</button>
                             </div>
                         </div>`;
                 });
@@ -224,8 +245,8 @@
 
         function toggleDone(idx) { hub.folders[hub.activeFolder].days[hub.activeDay][idx].done = !hub.folders[hub.activeFolder].days[hub.activeDay][idx].done; saveAll(); }
         function updateEx(idx, f, v) { hub.folders[hub.activeFolder].days[hub.activeDay][idx][f] = v; saveAll(); }
-        function deleteEx(idx) { if(confirm("Delete?")) { hub.folders[hub.activeFolder].days[hub.activeDay].splice(idx,1); saveAll(); } }
-        function deleteFolder(id) { if(confirm("Delete?")) { delete hub.folders[id]; hub.activeFolder = Object.keys(hub.folders)[0]; saveAll(); } }
+        function deleteEx(idx) { if(confirm("Delete exercise?")) { hub.folders[hub.activeFolder].days[hub.activeDay].splice(idx,1); saveAll(); } }
+        function deleteFolder(id) { if(confirm("Delete entire plan?")) { delete hub.folders[id]; hub.activeFolder = Object.keys(hub.folders)[0] || null; saveAll(); renderSidebar(); } }
         function exportHub() { navigator.clipboard.writeText(btoa(unescape(encodeURIComponent(JSON.stringify(hub))))).then(() => alert("COPIED!")); }
         function importHub() { let code = prompt("Paste code:"); if(code) { hub = JSON.parse(decodeURIComponent(escape(atob(code)))); applyTheme(); saveAll(); } }
 
